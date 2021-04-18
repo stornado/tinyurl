@@ -1,0 +1,13 @@
+baseurl: https://zxytech.com/
+
+db:
+  host: localhost
+  port: 3306
+  username: 
+  password: 
+  dbname: tinyurl
+
+redis:
+  host: localhost
+  port: 6379
+  password: 

@@ -111,13 +111,13 @@ func ListAll() ([]Tinyurl, error) {
 	defer db.Close()
 
 	// Prepare statement for reading data
-	stmtOut, err := db.Prepare("SELECT id,short,origin,created_at,expired_at FROM tinyurl WHERE expired_at < ?")
+	stmtOut, err := db.Prepare("SELECT id,short,origin,created_at,expired_at FROM tinyurl")
 	if err != nil {
 		return nil, err
 	}
 	defer stmtOut.Close()
 
-	rows, err := stmtOut.Query(time.Now())
+	rows, err := stmtOut.Query()
 	if err != nil {
 		return nil, err
 	}

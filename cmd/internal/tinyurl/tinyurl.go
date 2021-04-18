@@ -63,11 +63,12 @@ func Serve(port int) {
 	go func(cf *cuckoo.Filter) {
 		shortUrls, err := ListAll()
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
 		for _, shortUrl := range shortUrls {
 			ok := cf.InsertUnique([]byte(shortUrl.Short))
-			fmt.Println(ok, shortUrl)
+			err = Cache(shortUrl.Short, shortUrl.Origin)
+			log.Println(ok, shortUrl, err)
 		}
 	}(cf)
 
@@ -79,26 +80,26 @@ func Serve(port int) {
 	r.Any("/:short", func(c *gin.Context) {
 		short := c.Params.ByName("short")
 		found := cf.Lookup([]byte(short))
-		if found {
-			origin, err := CacheGet(short)
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"err": err.Error()})
-				return
-			}
-			if origin != "" {
-				c.Redirect(http.StatusTemporaryRedirect, origin)
-				return
-			}
-
-			tiny, err := PersistGet(short)
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"err": err.Error()})
-				return
-			}
-			c.Redirect(http.StatusTemporaryRedirect, tiny.Origin)
-		} else {
-			c.JSON(http.StatusNotFound, gin.H{"short": short})
+		if !found {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"short": short})
+			return
 		}
+		origin, err := CacheGet(short)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"err": err.Error()})
+			return
+		}
+		if origin != "" {
+			c.Redirect(http.StatusTemporaryRedirect, origin)
+			return
+		}
+
+		tiny, err := PersistGet(short)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"err": err.Error()})
+			return
+		}
+		c.Redirect(http.StatusTemporaryRedirect, tiny.Origin)
 	})
 
 	r.POST("/shorturl/", func(c *gin.Context) {

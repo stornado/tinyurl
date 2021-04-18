@@ -9,8 +9,9 @@ CREATE TABLE `tinyurl` (
   `origin` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `created_at` datetime NOT NULL,
   `expired_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_short` (`short`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 ```
 
 ## Config
